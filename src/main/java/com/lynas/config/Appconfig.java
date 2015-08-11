@@ -36,34 +36,22 @@ public class Appconfig {
         return dataSource;
     }
 
-
-
-    private Properties hibernateProperties() {
-        Properties properties = new Properties();
-        properties.put("dialect", "org.hibernate.dialect.MySQLDialect");
-        return properties;
-    }
-
     @Bean
     public AnnotationSessionFactoryBean sessionFactoryBean() {
         AnnotationSessionFactoryBean asfb = new AnnotationSessionFactoryBean();
         asfb.setDataSource(dataSource());
         asfb.setConfigLocation(new ClassPathResource("hibernate.cfg.xml"));
-        asfb.setHibernateProperties(hibernateProperties());
+        Properties properties = new Properties();
+        properties.put("dialect", "org.hibernate.dialect.MySQLDialect");
+        asfb.setHibernateProperties(properties);
         return asfb;
-    }
-
-    public SessionFactory sessionFactory() {
-        return sessionFactoryBean().getObject();
     }
 
     @Bean
     public HibernateTransactionManager transactionManager() {
         HibernateTransactionManager manager = new HibernateTransactionManager();
-        manager.setSessionFactory(sessionFactory());
+        manager.setSessionFactory(sessionFactoryBean().getObject());
         return manager;
     }
-
-
 
 }

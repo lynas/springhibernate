@@ -23,7 +23,7 @@ public class HomeController {
     @RequestMapping(value = "/add")
     public String add() {
         Student student = new Student();
-        student.setName("sazzad");
+        student.setName("Islam");
         studentService.add(student);
         return "index";
     }
