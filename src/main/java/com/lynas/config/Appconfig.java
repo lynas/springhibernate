@@ -1,12 +1,14 @@
 package com.lynas.config;
 
+import com.lynas.model.Student;
 import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.SessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.orm.hibernate3.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.util.Properties;
@@ -15,7 +17,7 @@ import java.util.Properties;
  * Created by sazzad on 8/11/2015.
  */
 @Configuration
-public class Appconfig {
+public class AppConfig {
 
     @Bean
     public InternalResourceViewResolver viewResolver() {
@@ -31,27 +33,32 @@ public class Appconfig {
         dataSource.addDataSourceProperty("serverName", "localhost");
         dataSource.addDataSourceProperty("databaseName", "studentdb");
         dataSource.addDataSourceProperty("user", "root");
-        dataSource.addDataSourceProperty("password", "s123456");
+        dataSource.addDataSourceProperty("password", "");
 
         return dataSource;
     }
 
     @Bean
-    public AnnotationSessionFactoryBean sessionFactoryBean() {
-        AnnotationSessionFactoryBean asfb = new AnnotationSessionFactoryBean();
-        asfb.setDataSource(dataSource());
-        asfb.setConfigLocation(new ClassPathResource("hibernate.cfg.xml"));
-        Properties properties = new Properties();
-        properties.put("dialect", "org.hibernate.dialect.MySQLDialect");
-        asfb.setHibernateProperties(properties);
-        return asfb;
+    public HibernateTransactionManager transactionManager() {
+        HibernateTransactionManager manager = new HibernateTransactionManager();
+        manager.setSessionFactory(hibernate5SessionFactoryBean().getObject());
+        return manager;
     }
 
     @Bean
-    public HibernateTransactionManager transactionManager() {
-        HibernateTransactionManager manager = new HibernateTransactionManager();
-        manager.setSessionFactory(sessionFactoryBean().getObject());
-        return manager;
+    public LocalSessionFactoryBean hibernate5SessionFactoryBean(){
+        LocalSessionFactoryBean localSessionFactoryBean = new LocalSessionFactoryBean();
+        localSessionFactoryBean.setDataSource(dataSource());
+        localSessionFactoryBean.setAnnotatedClasses(Student.class);
+
+        Properties properties = new Properties();
+        properties.put("hibernate.dialect","org.hibernate.dialect.MySQLDialect");
+        //properties.put("hibernate.current_session_context_class","thread");
+        properties.put("hibernate.hbm2ddl.auto","update");
+        properties.put("hibernate.show_sql","true");
+
+        localSessionFactoryBean.setHibernateProperties(properties);
+        return localSessionFactoryBean;
     }
 
 }
